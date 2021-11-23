@@ -2,15 +2,16 @@ from datetime import timedelta
 import pandas as pd
 from pandas import DataFrame, Series
 from pandas.core.reshape import reshape
+from pandas.io.pickle import read_pickle
 
 
 #---매월 말일자료 만들어서 말일 이후의 NaN값 날리기 (e.g., 2월 30일,31일, 4월 31일..등)
 seoul_temp_max = pd.read_csv('C:\\Python_workdir\\finalproj\\weather\\seoul_daily_temp_max.csv', encoding='cp949')
 
 yrmonth = seoul_temp_max.columns.tolist()[:-1]
-eod_monthly = [31,28,31,30,31,30, 31,31,30,31,30,31 ,
-                31,29,31,30,31,30, 31,31,30,31,30,31 ,
-                31,28,31,30,31,30, 31,31,30,31,30]
+eod_monthly = [31,28,31,30,31,30, 31,31,30,31,30,31 ,  #  2019
+                31,29,31,30,31,30, 31,31,30,31,30,31 , #  2020
+                31,28,31,30,31,30, 31,31,30,31,30]     # ~2021/11 
 
 end_of_days_in_month = DataFrame(yrmonth, eod_monthly)
 end_of_days_in_month.reset_index(inplace=True)
@@ -104,4 +105,34 @@ for iloca in loca:
 
     daily_weather.to_csv(iloca+'_daily_weather_201901-202111.csv',index=False)
     daily_weather.to_pickle(iloca+'_daily_weather_201901-202111.pkl')
+
+
+
+incheon_weather = pd.read_pickle('C:\\Python_workdir\\finalproj\\weather\\incheon_daily_weather_201901-202111.pkl')
+
+suwon_weather = pd.read_pickle('C:\\Python_workdir\\finalproj\\weather\\suwon_daily_weather_201901-202111.pkl')
+
+seoul_weather = pd.read_pickle('C:\\Python_workdir\\finalproj\\weather\\seoul_daily_weather_201901-202111.pkl')
+
+
+
+incheon_weather
+suwon_weather
+capital_area_weather = pd.concat([seoul_weather, incheon_weather[['최고기온','평균기온','일강수량']], suwon_weather[['최고기온','평균기온','일강수량']]], axis=1)
+capital_area_weather.columns = ['일시', '서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']
+
+capital_area_weather.일시 = capital_area_weather.일시.astype('str')
+capital_area_weather
+
+capital_area_avg_weather = DataFrame(columns=['일시','일강수량','최고기온','평균기온'])
+capital_area_weather[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']] = capital_area_weather[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']].astype('float32')
+
+capital_area_weather.info()
+capital_area_weather.
+for i in capital_area_weather.일시:
+    i = capital_area_weather.일시[0]
+    date  = capital_area_weather['일시']==i
+    maxtemp = capital_area_weather.loc[date,['서울최고기온','수원최고기온','인천최고기온']].T.mean()
+    avgtemp = capital_area_weather.loc[date,['서울평균기온','수원평균기온','인천평균기온']].T.mean()
+    precipi = capital_area_weather.loc[date,['서울최고기온','수원최고기온','인천최고기온']].T.mean()
     
