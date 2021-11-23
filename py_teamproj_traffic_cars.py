@@ -1,7 +1,6 @@
 
 import pandas as pd
 from pandas import DataFrame, Series
-from tensorflow.python.keras.backend import repeat_elements
 
 namekeys = ['경기광주','금산사','남원주',   '서울산','서울주','연화산']
 namepatch= {'경기광주':'GG_GGGJ', '금산사':'JB_GSS','남원주':'GW_NWJ',   '서울산':'US_SUS','서울주':'US_SUJ','연화산':'GN_YHS' }
