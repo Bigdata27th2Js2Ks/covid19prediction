@@ -122,17 +122,61 @@ capital_area_weather = pd.concat([seoul_weather, incheon_weather[['최고기온'
 capital_area_weather.columns = ['일시', '서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']
 
 capital_area_weather.일시 = capital_area_weather.일시.astype('str')
-capital_area_weather
+capital_area_weather.info()
 
 capital_area_avg_weather = DataFrame(columns=['일시','일강수량','최고기온','평균기온'])
 capital_area_weather[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']] = capital_area_weather[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']].astype('float32')
 
 capital_area_weather.info()
-capital_area_weather.
-for i in capital_area_weather.일시:
-    i = capital_area_weather.일시[0]
+
+for i in capital_area_weather.일시.tolist():
+    #i = capital_area_weather.일시[0]
     date  = capital_area_weather['일시']==i
-    maxtemp = capital_area_weather.loc[date,['서울최고기온','수원최고기온','인천최고기온']].T.mean()
-    avgtemp = capital_area_weather.loc[date,['서울평균기온','수원평균기온','인천평균기온']].T.mean()
-    precipi = capital_area_weather.loc[date,['서울최고기온','수원최고기온','인천최고기온']].T.mean()
+    maxtemp = float(capital_area_weather.loc[date,['서울최고기온','수원최고기온','인천최고기온']].T.mean())
+    avgtemp = float(capital_area_weather.loc[date,['서울평균기온','수원평균기온','인천평균기온']].T.mean())
+    precipi = float(capital_area_weather.loc[date,['서울일강수량','수원일강수량','인천일강수량']].T.mean(skipna=True))
     
+    capital_area_avg_weather = capital_area_avg_weather.append({'일시':i,  '일강수량':precipi ,'최고기온':maxtemp ,'평균기온':avgtemp}, ignore_index=True)
+
+capital_area_avg_weather.to_pickle('C:\\Python_workdir\\finalproj\\weather\\capital_area_weather_daily_201901_202111.pkl')
+
+
+capital_area_weather_v2 = capital_area_weather
+capital_area_weather_v2['연월'] = capital_area_weather_v2.일시.astype('str').str[:-3]
+capital_area_weather_v2.info()
+
+capital_area_avg_weather_v2 = DataFrame(columns=['연월','월평균강수량','최고기온','평균기온'])
+capital_area_weather_v2[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']] = capital_area_weather_v2[['서울최고기온', '서울평균기온', '서울일강수량', '인천최고기온', '인천평균기온', '인천일강수량', '수원최고기온', '수원평균기온', '수원일강수량']].astype('float32')
+
+capital_area_weather_v2.groupby('연월').
+capital_area_weather_v2.info()
+
+for i in capital_area_weather_v2.연월.unique().tolist():
+    #i = capital_area_weather_v2.연월.unique().tolist()[0]
+    date  = capital_area_weather_v2['연월']==i
+    temp = capital_area_weather_v2.loc[date].groupby('연월').mean()
+    maxtemp = float(temp[['서울최고기온','수원최고기온','인천최고기온']].T.mean())
+    avgtemp = float(temp[['서울평균기온','수원평균기온','인천평균기온']].T.mean())
+    precipi = float(temp[['서울일강수량','수원일강수량','인천일강수량']].T.mean(skipna=True))
+    
+    capital_area_avg_weather_v2 = capital_area_avg_weather_v2.append({'연월':i,  '월평균강수량':precipi ,'최고기온':maxtemp ,'평균기온':avgtemp}, ignore_index=True)
+
+capital_area_avg_weather_v2.to_pickle('C:\\Python_workdir\\finalproj\\weather\\capital_area_weather_monthly_201901_202111.pkl')
+
+
+
+"""
+# 강수량 범주화를 위한 참고용 dataframe 
+기상청 공식블로그 참고: https://m.blog.naver.com/kma_131/222073284939
+~3mm 미만       약한비 (이슬비) 
+3~15mm 미만     보통비 (가랑비..?)
+15~30mm 미만    강한비
+30mm이상        아주강한비
+"""
+df_precipitation = DataFrame(columns = ['강도', '최소강수량', '최대강수량'])
+df_precipitation.강도 = ['약한비', '보통비', '강한비', '아주강한비']
+df_precipitation.최소강수량 = [0, 3, 15, 30.]
+df_precipitation.최대강수량 = [3, 15, 30, 9999.]
+df_precipitation.info()
+df_precipitation.to_pickle('C:\\Python_workdir\\finalproj\\weather\\rain_precipitation_range.pkl')
+df_precipitation.to_csv('C:\\Python_workdir\\finalproj\\weather\\rain_precipitation_range.csv', index=False)
